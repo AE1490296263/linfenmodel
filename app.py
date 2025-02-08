@@ -10,7 +10,7 @@ import time
 app = Flask(__name__)
 
 # Load model
-model = joblib.load('D:\Desktop\colorectalcancermodelonline\结直肠模型.joblib')
+model = joblib.load('D:\Desktop\colorectalcancermodelonline\colorectal.joblib')
 feature_columns = ['CEA', 'ALB', 'CIKP', 'Cyfra211', 'Ca', 'HGB']
 
 # Configure matplotlib for non-GUI backend
