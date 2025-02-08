@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorectal Cancer Prediction Model</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Colorectal Prediction Model</h1>
+        <p class="text-center text-muted">Due to technical reasons, only predictions for colorectal polyps are temporarily supported. Please select "colorectal polyp" before predicting. We apologize for any inconvenience caused and thank you for your understanding.</p>
+        <div class="card shadow mb-5">
+            <div class="card-body">
+                <form id="predictionForm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">CEA (ng/mL)</label>
+                            <input type="number" step="0.1" class="form-control" required name="CEA">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">ALB (g/dL)</label>
+                            <input type="number" step="0.1" class="form-control" required name="ALB">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">CIKP (%)</label>
+                            <input type="number" step="0.1" class="form-control" required name="CIKP">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cyfra211 (ng/mL)</label>
+                            <input type="number" step="0.1" class="form-control" required name="Cyfra211">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ca (mg/dL)</label>
+                            <input type="number" step="0.1" class="form-control" required name="Ca">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">HGB (g/dL)</label>
+                            <input type="number" step="0.1" class="form-control" required name="HGB">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-4 w-100">Predict</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="results" class="d-none">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Prediction Results</h5>
+                            <div class="progress mb-3" style="height: 30px;">
+                                <div class="progress-bar bg-danger" role="progressbar" id="cancerBar"></div>
+                            </div>
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar bg-success" role="progressbar" id="polypBar"></div>
+                            </div>
+                            <div class="mt-3">
+                                <p>Cancer Probability: <span id="cancerProb" class="fw-bold"></span>%</p>
+                                <p>Polyp Probability: <span id="polypProb" class="fw-bold"></span>%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">SHAP Explanation</h5>
+                            <img id="shapPlot" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#predictionForm').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/predict',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.error) {
+                            alert('Error: ' + response.error);
+                            return;
+                        }
+                        
+                        $('#results').removeClass('d-none');
+                        $('#cancerProb').text(response.cancer_prob);
+                        $('#polypProb').text(response.polyp_prob);
+                        
+                        $('#cancerBar').css('width', response.cancer_prob + '%');
+                        $('#polypBar').css('width', response.polyp_prob + '%');
+                        
+                        $('#shapPlot').attr('src', response.shap_plot + '?t=' + new Date().getTime());
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
