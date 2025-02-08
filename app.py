@@ -112,5 +112,6 @@ def generate_shap_plot(input_data, prediction_type):
 
 if __name__ == '__main__':
     os.makedirs(os.path.join('static', 'shap_plots'), exist_ok=True)
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 
